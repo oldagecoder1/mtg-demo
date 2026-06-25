@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Handwritten Note Parser Pro</title>
+
+  <!-- Premium Web Typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Cropper.js for precise interactive element selection -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+  <!-- KaTeX for live formula preview -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0f111a;
+      --bg-panel: rgba(22, 28, 45, 0.7);
+      --bg-card: rgba(30, 41, 69, 0.5);
+      --border-glow: rgba(139, 92, 246, 0.2);
+      --accent: #8b5cf6;
+      --accent-hover: #a78bfa;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 10% 20%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 90% 80%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: rgba(15, 17, 26, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 1.25rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      width: 2.25rem;
+      height: 2.25rem;
+      background: linear-gradient(135deg, var(--accent), #3b82f6);
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.25rem;
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+    }
+
+    .brand-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      background: linear-gradient(to right, #f3f4f6, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .main-container {
+      display: grid;
+      grid-template-columns: 320px 1fr 400px;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      height: calc(100vh - 75px);
+      max-width: 1800px;
+      margin: 0 auto;
+    }
+
+    /* GLASS CARD STYLE */
+    .panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glow);
+      border-radius: 1rem;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    .panel-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent-hover);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .panel-content {
+      padding: 1.25rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    /* LEFT CONTROLS PANEL */
+    .upload-zone {
+      border: 2px dashed rgba(139, 92, 246, 0.3);
+      border-radius: 0.75rem;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: rgba(139, 92, 246, 0.02);
+      margin-bottom: 1.25rem;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--accent);
+      background: rgba(139, 92, 246, 0.06);
+      box-shadow: inset 0 0 15px rgba(139, 92, 246, 0.1);
+    }
+
+    .upload-zone svg {
+      width: 2.5rem;
+      height: 2.5rem;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    .upload-zone p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .upload-zone input {
+      display: none;
+    }
+
+    .section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 1rem 0 0.5rem 0;
+      letter-spacing: 0.05em;
+    }
+
+    .control-group {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Switch / Toggle Controls */
+    .control-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .control-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 2.75rem;
+      height: 1.5rem;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: .3s;
+      border-radius: 1rem;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 1.1rem;
+      width: 1.1rem;
+      left: 0.2rem;
+      bottom: 0.2rem;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(1.25rem);
+    }
+
+    /* MODE SELECT BUTTONS */
+    .mode-select {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .mode-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      transition: all 0.2s;
+    }
+
+    .mode-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(139, 92, 246, 0.5);
+    }
+
+    .mode-btn.active {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+    }
+
+    /* ACTION BUTTON */
+    .action-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent), #3b82f6);
+      border: none;
+      border-radius: 0.75rem;
+      padding: 0.9rem;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .action-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* CENTER CANVAS PANEL */
+    .center-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .cropper-wrapper {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      min-height: 400px;
+    }
+
+    .cropper-wrapper img {
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+    }
+
+    .placeholder-canvas {
+      color: var(--text-muted);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 3rem;
+    }
+
+    .placeholder-canvas svg {
+      width: 4rem;
+      height: 4rem;
+      opacity: 0.3;
+    }
+
+    /* RIGHT DOCUMENT BUILDER PANEL */
+    .doc-sidebar {
+      border-left: 1px solid var(--border-glow);
+    }
+
+    .notes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .note-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+      position: relative;
+      transition: all 0.3s;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .note-card:hover {
+      border-color: rgba(139, 92, 246, 0.3);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .note-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .note-card-mode {
+      background: rgba(139, 92, 246, 0.1);
+      color: var(--accent-hover);
+      padding: 0.15rem 0.4rem;
+      border-radius: 0.25rem;
+      font-weight: 500;
+    }
+
+    .note-card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .note-btn-small {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 0.25rem;
+    }
+
+    .note-btn-small:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .note-card-body {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .note-crop-thumb {
+      width: 70px;
+      height: 70px;
+      object-fit: contain;
+      background: #000;
+      border-radius: 0.375rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .note-card-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .katex-render-area {
+      background: rgba(15, 17, 26, 0.5);
+      border-radius: 0.375rem;
+      padding: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      border-left: 2px solid var(--accent);
+    }
+
+    .note-edit-area {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.375rem;
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      padding: 0.4rem;
+      resize: vertical;
+      min-height: 50px;
+    }
+
+    .note-edit-area:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .empty-sidebar {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 3rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .empty-sidebar svg {
+      width: 3rem;
+      height: 3rem;
+      opacity: 0.2;
+    }
+
+    /* EXPORT BAR AT BOTTOM OF SIDEBAR */
+    .sidebar-footer {
+      padding: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    /* MODAL STYLE FOR COMPILED NOTE */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .modal-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--accent);
+      border-radius: 1rem;
+      width: 100%;
+      max-width: 700px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 50px rgba(139, 92, 246, 0.3);
+    }
+
+    .modal-card-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-card-body {
+      padding: 1.25rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .compiled-textarea {
+      width: 100%;
+      height: 350px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.5rem;
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      padding: 0.75rem;
+      resize: none;
+    }
+
+    .compiled-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .modal-card-footer {
+      padding: 1.25rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: rgba(16, 185, 129, 0.9);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      z-index: 2000;
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+      display: none;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(100px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">P</div>
+      <div class="brand-title">
+        <h1>Handwritten Note Parser Pro</h1>
+        <p>Interactive element cropping & OpenCV preprocessed VLM transcription</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN GRID LAYOUT -->
+  <div class="main-container">
+
+    <!-- LEFT CONTROLS PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+          Workspace Settings
+        </span>
+      </div>
+      <div class="panel-content">
+        <!-- Upload -->
+        <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+          <p id="upload-status">Click to upload handwritten page</p>
+          <input type="file" id="fileInput" accept="image/*">
+        </div>
+
+        <!-- Preprocessing Filters -->
+        <h3 class="section-title">OpenCV Enhancements</h3>
+        <div class="control-group">
+          <div class="control-row">
+            <span class="control-label">CLAHE (Contrast Booster)</span>
+            <label class="switch">
+              <input type="checkbox" id="filter-clahe" onchange="triggerFullPreprocessing()">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="control-row">
+            <span class="control-label">Denoise (Smooth)</span>
+            <label class="switch">
+              <input type="checkbox" id="filter-denoise" onchange="triggerFullPreprocessing()">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="control-row">
+            <span class="control-label">B&W Adaptive Threshold</span>
+            <label class="switch">
+              <input type="checkbox" id="filter-binarize" onchange="triggerFullPreprocessing()">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Recognition Mode -->
+        <h3 class="section-title">VLM Mode</h3>
+        <div class="mode-select">
+          <button class="mode-btn active" data-mode="formula" onclick="setMode('formula')">
+            <span>🧮</span>
+            Formula (LaTeX)
+          </button>
+          <button class="mode-btn" data-mode="ocr" onclick="setMode('ocr')">
+            <span>📝</span>
+            Plain OCR Text
+          </button>
+          <button class="mode-btn" data-mode="table" onclick="setMode('table')">
+            <span>📊</span>
+            Table (MD)
+          </button>
+          <button class="mode-btn" data-mode="chart" onclick="setMode('chart')">
+            <span>📈</span>
+            Chart Desc
+          </button>
+        </div>
+
+        <!-- Action button -->
+        <button id="run-btn" class="action-btn" onclick="recognizeSelection()" disabled>
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          Transcribe Selection
+        </button>
+      </div>
+    </div>
+
+    <!-- CENTER CROP CANVAS PANEL -->
+    <div class="panel center-panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          Cropper Canvas
+        </span>
+      </div>
+      <div class="cropper-wrapper" id="canvas-wrapper">
+        <div class="placeholder-canvas" id="canvas-placeholder">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          <p>Please upload a notes image on the left workspace to begin cropping</p>
+        </div>
+        <img id="cropper-image" src="" alt="Source Document" style="display: none;">
+      </div>
+    </div>
+
+    <!-- RIGHT DOCUMENT BUILDER PANEL -->
+    <div class="panel doc-sidebar">
+      <div class="panel-header">
+        <span class="panel-title">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          Note Compilation Builder
+        </span>
+      </div>
+      <div class="panel-content" id="sidebar-list-container">
+        <!-- Initial empty state -->
+        <div class="empty-sidebar" id="sidebar-empty">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0V9a2 2 0 00-2-2H6a2 2 0 00-2 2v4m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2 2"></path></svg>
+          <p>No elements compiled yet.</p>
+          <span style="font-size: 0.75rem;">Crop equations, run transcription, and they will stack here.</span>
+        </div>
+
+        <div class="notes-list" id="compiled-notes-wrapper" style="display: none;">
+          <!-- Transcribed note cards appended here dynamically -->
+        </div>
+      </div>
+      
+      <!-- Footer Export Actions -->
+      <div class="sidebar-footer" id="sidebar-footer-actions" style="display: none;">
+        <button class="action-btn" onclick="compileFullNote()">
+          Compile Note Document (.md)
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- EXPORT MODAL -->
+  <div class="modal-overlay" id="exportModal">
+    <div class="modal-card">
+      <div class="modal-card-header">
+        <span class="panel-title">Compiled Markdown Note</span>
+        <button class="note-btn-small" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-card-body">
+        <textarea class="compiled-textarea" id="compiled-output-text" readonly></textarea>
+      </div>
+      <div class="modal-card-footer">
+        <button class="btn-secondary" onclick="copyModalContent()">Copy Markdown</button>
+        <button class="action-btn" onclick="downloadCompiledNote()" style="width: auto;">Download file</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toast">Copy successful!</div>
+
+  <script>
+    let cropper = null;
+    let selectedMode = 'formula';
+    let originalImageFile = null;
+    let preprocessedImageDataUrl = null;
+    let noteCounter = 0;
+    let compiledElements = [];
+
+    // FILE UPLOAD AND CROPPER INITIALIZATION
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      originalImageFile = file;
+      document.getElementById('upload-status').innerText = `Uploaded: ${file.name}`;
+      
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        initCropper(event.target.result);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function initCropper(imageSrc) {
+      const img = document.getElementById('cropper-image');
+      img.src = imageSrc;
+      img.style.display = 'block';
+      document.getElementById('canvas-placeholder').style.display = 'none';
+
+      if (cropper) {
+        cropper.destroy();
+      }
+
+      cropper = new Cropper(img, {
+        viewMode: 1,
+        dragMode: 'crop',
+        autoCropArea: 0.6,
+        restore: false,
+        modal: true,
+        guides: true,
+        highlight: true,
+        cropBoxMovable: true,
+        cropBoxResizable: true,
+        toggleDragModeOnDblclick: false,
+      });
+
+      document.getElementById('run-btn').disabled = false;
+      
+      // Reset enhancements toggles when new image is uploaded
+      document.getElementById('filter-clahe').checked = false;
+      document.getElementById('filter-denoise').checked = false;
+      document.getElementById('filter-binarize').checked = false;
+      preprocessedImageDataUrl = null;
+    }
+
+    // RUN PRE-PROCESSING ON FULL IMAGE AND UPDATE CROPPER SOURCE
+    function triggerFullPreprocessing() {
+      if (!originalImageFile) return;
+
+      const clahe = document.getElementById('filter-clahe').checked;
+      const denoise = document.getElementById('filter-denoise').checked;
+      const binarize = document.getElementById('filter-binarize').checked;
+
+      const steps = [];
+      if (clahe) steps.push("clahe");
+      if (denoise) steps.push("denoise");
+      if (binarize) steps.push("binarize");
+
+      if (steps.length === 0) {
+        // Reset to original image source
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          updateCropperImageSource(e.target.result);
+        };
+        reader.readAsDataURL(originalImageFile);
+        return;
+      }
+
+      // Query server preprocessing
+      const formData = new FormData();
+      formData.append("file", originalImageFile);
+      formData.append("steps", JSON.stringify(steps));
+
+      document.getElementById('upload-status').innerText = "Enhancing page using OpenCV...";
+
+      fetch('/preprocess/', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          alert("Error preprocessing: " + data.error);
+        } else {
+          preprocessedImageDataUrl = data.preprocessed_image;
+          updateCropperImageSource(preprocessedImageDataUrl);
+          document.getElementById('upload-status').innerText = "Enhancement applied.";
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('upload-status').innerText = "Failed to apply enhancement.";
+      });
+    }
+
+    function updateCropperImageSource(newSrc) {
+      if (!cropper) return;
+      
+      // Store current crop box data to preserve it across source switch
+      const cropData = cropper.getData();
+      
+      // Replace image source
+      cropper.replace(newSrc);
+      
+      // Restore crop box data once replacement completes
+      setTimeout(() => {
+        cropper.setData(cropData);
+      }, 100);
+    }
+
+    // SET VLM RECOGNITION MODE
+    function setMode(mode) {
+      selectedMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-mode') === mode) {
+          btn.classList.add('active');
+        }
+      });
+    }
+
+    // CROPS THE CURRENT SELECTION AND RUNS VLM RECOGNITION
+    function recognizeSelection() {
+      if (!cropper) return;
+
+      const runBtn = document.getElementById('run-btn');
+      runBtn.disabled = true;
+      runBtn.innerText = "Transcribing crop...";
+
+      // Get Cropped Canvas (full resolution based on source size)
+      const croppedCanvas = cropper.getCroppedCanvas();
+      
+      croppedCanvas.toBlob(function(blob) {
+        const formData = new FormData();
+        formData.append("file", blob, "crop.png");
+        formData.append("mode", selectedMode);
+        
+        // Pass empty steps array since we already preprocessed the parent image and cropped from it
+        formData.append("steps", JSON.stringify([]));
+
+        fetch('/recognize/', {
+          method: 'POST',
+          body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+          runBtn.disabled = false;
+          runBtn.innerHTML = `
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            Transcribe Selection
+          `;
+
+          if (data.error) {
+            alert("VLM Recognition failed: " + data.error);
+          } else {
+            appendNoteToBuilder(data);
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          runBtn.disabled = false;
+          runBtn.innerText = "Transcribe Selection";
+          alert("Error communicating with parser server.");
+        });
+      }, "image/png");
+    }
+
+    // COMPILATION BUILDER HANDLERS
+    function appendNoteToBuilder(data) {
+      noteCounter++;
+      
+      const container = document.getElementById('compiled-notes-wrapper');
+      const emptyState = document.getElementById('sidebar-empty');
+      const footerActions = document.getElementById('sidebar-footer-actions');
+      
+      emptyState.style.display = 'none';
+      container.style.display = 'flex';
+      footerActions.style.display = 'flex';
+
+      const elementId = `note-${noteCounter}`;
+      compiledElements.push({
+        id: elementId,
+        mode: data.mode,
+        text: data.cleaned_text,
+        processedCropUrl: data.processed_crop
+      });
+
+      const card = document.createElement('div');
+      card.className = 'note-card';
+      card.id = elementId;
+      
+      // Short display modes
+      const modeLabels = {
+        formula: "Formula",
+        ocr: "Text OCR",
+        table: "Table",
+        chart: "Chart"
+      };
+
+      card.innerHTML = `
+        <div class="note-card-header">
+          <span class="note-card-mode">${modeLabels[data.mode] || data.mode}</span>
+          <div class="note-card-actions">
+            <button class="note-btn-small" onclick="deleteCard('${elementId}')" title="Delete crop">✕</button>
+          </div>
+        </div>
+        <div class="note-card-body">
+          <img class="note-crop-thumb" src="${data.processed_crop}" alt="Crop Preview">
+          <div class="note-card-details">
+            <div class="katex-render-area" id="${elementId}-math"></div>
+            <textarea class="note-edit-area" id="${elementId}-textarea" oninput="updateElementText('${elementId}', this.value)">${data.cleaned_text}</textarea>
+          </div>
+        </div>
+      `;
+
+      container.appendChild(card);
+      
+      // Render Math if in formula mode
+      renderCardMath(elementId, data.cleaned_text, data.mode);
+      
+      // Scroll sidebar to bottom
+      const sidebarContainer = document.getElementById('sidebar-list-container');
+      sidebarContainer.scrollTop = sidebarContainer.scrollHeight;
+    }
+
+    function renderCardMath(id, text, mode) {
+      const renderEl = document.getElementById(`${id}-math`);
+      if (!renderEl) return;
+
+      if (mode !== 'formula') {
+        renderEl.style.display = 'none';
+        return;
+      }
+
+      renderEl.style.display = 'block';
+      
+      // Clean display math wrappers for KaTeX block rendering
+      let mathContent = text;
+      let displayMode = false;
+      
+      if (mathContent.startsWith("$$\n") && mathContent.endsWith("\n$$")) {
+        mathContent = mathContent.slice(3, -3);
+        displayMode = true;
+      } else if (mathContent.startsWith("$$") && mathContent.endsWith("$$")) {
+        mathContent = mathContent.slice(2, -2);
+        displayMode = true;
+      } else if (mathContent.startsWith("$") && mathContent.endsWith("$")) {
+        mathContent = mathContent.slice(1, -1);
+      }
+
+      try {
+        katex.render(mathContent, renderEl, {
+          throwOnError: false,
+          displayMode: displayMode
+        });
+      } catch (err) {
+        renderEl.innerText = text;
+      }
+    }
+
+    function updateElementText(id, newText) {
+      const index = compiledElements.findIndex(el => el.id === id);
+      if (index !== -1) {
+        compiledElements[index].text = newText;
+        renderCardMath(id, newText, compiledElements[index].mode);
+      }
+    }
+
+    function deleteCard(id) {
+      const card = document.getElementById(id);
+      if (card) {
+        card.remove();
+      }
+      compiledElements = compiledElements.filter(el => el.id !== id);
+      
+      if (compiledElements.length === 0) {
+        document.getElementById('compiled-notes-wrapper').style.display = 'none';
+        document.getElementById('sidebar-empty').style.display = 'flex';
+        document.getElementById('sidebar-footer-actions').style.display = 'none';
+      }
+    }
+
+    // COMPILES ALL ELEMENTS INTO A SINGLE MARKDOWN DOCUMENT
+    function compileFullNote() {
+      if (compiledElements.length === 0) return;
+
+      let docLines = [
+        `# Handwritten Lecture & Formula Notes\n`,
+        `Compiled: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}\n`,
+        `---\n`
+      ];
+
+      compiledElements.forEach((el, index) => {
+        docLines.push(`### Section ${index + 1}\n`);
+        docLines.push(`${el.text.trim()}\n\n`);
+      });
+
+      const markdownString = docLines.join("\n");
+      
+      document.getElementById('compiled-output-text').value = markdownString;
+      document.getElementById('exportModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('exportModal').style.display = 'none';
+    }
+
+    function copyModalContent() {
+      const txt = document.getElementById('compiled-output-text');
+      txt.select();
+      txt.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(txt.value);
+
+      // Show toast
+      const toast = document.getElementById('toast');
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2000);
+    }
+
+    function downloadCompiledNote() {
+      const content = document.getElementById('compiled-output-text').value;
+      const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "compiled_handwritten_note.md";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>

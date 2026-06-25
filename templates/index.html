@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTG Parsers Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f1117;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #38bdf8;
+            --primary-hover: #0284c7;
+            --accent: #818cf8;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        /* Hero Section */
+        .hero {
+            width: 100%;
+            background: linear-gradient(135deg, #1a1f2e 0%, #16213e 50%, #0f3460 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 60px 24px;
+            text-align: center;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 80%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, transparent 60%);
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+            z-index: 1;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            padding: 60px 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px 32px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: #475569;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-icon {
+            font-size: 3.5rem;
+            margin-bottom: 24px;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .card-icon {
+            transform: scale(1.1);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 32px;
+            flex-grow: 1;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 14px 24px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #0ea5e9, #6366f1);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: opacity 0.2s, transform 0.1s;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            opacity: 0.95;
+            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            .hero p {
+                font-size: 1rem;
+            }
+            .container {
+                padding: 40px 20px;
+                gap: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="hero">
+        <h1>MTG <span>Parsers Hub</span></h1>
+        <p>Your professional toolkit for digital document intelligence and handwritten formula recognition.</p>
+    </header>
+
+    <main class="container">
+        <!-- Digital PDF Parser Card -->
+        <div class="card">
+            <div>
+                <div class="card-icon">📘</div>
+                <h2>Digital PDF Parser</h2>
+                <p>Advanced document parsing engine optimized for Physics, Chemistry, and Math textbook pages. Extracts text, tables, and precise layouts directly from PDFs and scanned images.</p>
+            </div>
+            <a href="/digital/" class="btn">Open Parser</a>
+        </div>
+
+        <!-- Handwritten Formula Parser Card -->
+        <div class="card">
+            <div>
+                <div class="card-icon">✍️</div>
+                <h2>Handwritten Formula Parser</h2>
+                <p>Intelligent element-level VLM recognition for handwritten notes. Instantly translates hand-drawn math, chemistry equations, text, and charts into clean LaTeX and Markdown.</p>
+            </div>
+            <a href="/handwritten/" class="btn">Open Parser</a>
+        </div>
+    </main>
+
+</body>
+</html>

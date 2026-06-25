@@ -1,0 +1,30 @@
+# Environments
+env/
+venv/
+*env*/
+mtg-poc-env/
+mtg-poc-env-3.11/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore PDF files
+*.pdf
+
+# Application output and generated directories
+output/
+extracted_images/
+scratch/
+mlx_paddleocr_vl/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
