@@ -8,19 +8,22 @@ pipeline = PaddleOCRVL(
     device="gpu",
     use_doc_orientation_classify=True,
     use_doc_unwarping=True,
-    use_layout_detection=True
+    use_layout_detection=True,
 )
 
 print("Pipeline Loaded", flush=True)
 
 start = time.time()
 
-generator = pipeline.predict("chemistry_short2.jpg")
+output = pipeline.predict("chemistry_short2.jpg")
 
-print("predict() returned generator", flush=True)
+print("predict() finished", flush=True)
 
-output = next(generator)
+print("Type:", type(output), flush=True)
 
-print("Got first result", flush=True)
+try:
+    print("Length:", len(output), flush=True)
+except Exception as e:
+    print("Cannot get length:", e, flush=True)
 
-print(f"Prediction completed in {time.time()-start:.2f} sec", flush=True)
+print(f"Time: {time.time() - start:.2f} sec", flush=True)
