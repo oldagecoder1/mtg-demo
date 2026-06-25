@@ -2,7 +2,7 @@ import time
 import paddle
 from paddleocr import PaddleOCRVL
 
-print("Loading pipeline...")
+print("Loading pipeline...", flush=True)
 
 pipeline = PaddleOCRVL(
     device="gpu",
@@ -11,14 +11,16 @@ pipeline = PaddleOCRVL(
     use_layout_detection=True
 )
 
-print("Pipeline Loaded")
+print("Pipeline Loaded", flush=True)
 
 start = time.time()
 
-output = pipeline.predict("chemistry_short2.jpg")
+generator = pipeline.predict("chemistry_short2.jpg")
 
-print(f"Prediction completed in {time.time()-start:.2f} sec")
+print("predict() returned generator", flush=True)
 
-pages = list(output)
+output = next(generator)
 
-print("Pages:", len(pages))
+print("Got first result", flush=True)
+
+print(f"Prediction completed in {time.time()-start:.2f} sec", flush=True)
