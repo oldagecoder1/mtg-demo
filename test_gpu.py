@@ -5,7 +5,7 @@ from paddleocr import PaddleOCRVL
 print("Loading pipeline...", flush=True)
 
 pipeline = PaddleOCRVL(
-    device="gpu",
+    device="gpu:0",
     use_doc_orientation_classify=True,
     use_doc_unwarping=True,
     use_layout_detection=True,
