@@ -42,10 +42,7 @@ def get_pipeline():
         print("Loading PaddleOCRVL...")
 
         pipeline = PaddleOCRVL(
-            device="gpu",
-            use_doc_orientation_classify=True,
-            use_doc_unwarping=True,
-            use_layout_detection=True,
+            pipeline_version="v1"
         )
 
     return pipeline
@@ -603,4 +600,4 @@ async def get_dashboard():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app_pcm_master_parser:app", host="127.0.0.1", port=8000, reload=False)
+    uvicorn.run("app_pcm_master_parser:app", host="0.0.0.0", port=8000, reload=False)
